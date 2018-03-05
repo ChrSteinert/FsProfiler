@@ -9,9 +9,11 @@ let wait (ms : int) =
 
 let DP () =
     let qwe (fp : DisposingProfiler) = 
-        use fp2 = fp.StartSubtask "test2"
+        use fp2 = fp.StartSubtask "DP Level 1"
         wait 5
-    use fp = new DisposingProfiler "test"
+        use fp3 = fp2.StartSubtask "DP Level 2"
+        wait 4
+    use fp = new DisposingProfiler "DP Level 0"
     qwe fp    
     wait 20
 
