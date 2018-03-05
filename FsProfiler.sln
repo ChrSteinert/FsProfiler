@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2036
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FsProfiler", "src\FsProfiler\FsProfiler.fsproj", "{DC8C143E-EE8E-4640-82FD-811FEB979639}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DC8C143E-EE8E-4640-82FD-811FEB979639}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC8C143E-EE8E-4640-82FD-811FEB979639}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC8C143E-EE8E-4640-82FD-811FEB979639}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC8C143E-EE8E-4640-82FD-811FEB979639}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E27ADFD3-66C1-4F8F-B60A-62D1850F74F2}
+	EndGlobalSection
+EndGlobal
