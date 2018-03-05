@@ -35,7 +35,7 @@ type FsProfilerEvents private () =
     interface IDisposable with
         member __.Dispose () = log.Dispose ()
 
-type FsProfiler private (eventName, parent : FsProfiler option) =
+type DisposingProfiler private (eventName, parent : DisposingProfiler option) =
     let watch = Stopwatch.StartNew ()
 
     do
@@ -43,7 +43,7 @@ type FsProfiler private (eventName, parent : FsProfiler option) =
         | Some c -> FsProfilerEvents.Log.StartSubtask(eventName, c.EventName)
         | None -> FsProfilerEvents.Log.StartTask eventName
 
-    new (eventName) = new FsProfiler (eventName, None)
+    new (eventName) = new DisposingProfiler (eventName, None)
 
     member __.EventName = eventName
     member __.Level = 
@@ -52,7 +52,7 @@ type FsProfiler private (eventName, parent : FsProfiler option) =
         | None -> 0
 
     member this.StartSubtask eventName =
-        new FsProfiler(eventName, this |> Some)
+        new DisposingProfiler(eventName, this |> Some)
 
     member __.Dispose () =
         watch.Stop ()
@@ -63,3 +63,16 @@ type FsProfiler private (eventName, parent : FsProfiler option) =
     interface IDisposable with
         member this.Dispose () =
             this.Dispose ()
+
+type WrappingProfiler<'a> private (eventName, f : unit -> 'a) =
+
+    member private __.Run () =
+        let watch = Stopwatch.StartNew ()
+        let result = f ()
+        watch.Stop ()
+        FsProfilerEvents.Log.ReportTask(eventName, watch.ElapsedMilliseconds)
+        result
+
+    static member Profile eventName f =
+        let profiler = WrappingProfiler(eventName, f)
+        profiler.Run ()
