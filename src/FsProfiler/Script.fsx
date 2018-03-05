@@ -1,6 +1,8 @@
 #load "FsProfiler.fs"
 open FsProfiler
 
+open System.Diagnostics.Tracing
+
 let wait (ms : int) = 
     System.Threading.Thread.Sleep ms
 
@@ -23,3 +25,21 @@ DP ()
 
 
 WP ()
+
+
+
+type TracePrinter () =
+    inherit EventListener ()
+
+    let queue = new System.Collections.Concurrent.ConcurrentQueue<EventWrittenEventArgs> ()
+
+    member __.Dump () =
+        queue
+        |> Seq.iter (fun c -> printfn "%A" c.Message)
+
+    override __.OnEventWritten args =
+        queue.Enqueue args
+
+
+let tp = new TracePrinter ()
+tp.EnableEvents(FsProfilerEvents.Log, EventLevel.LogAlways)        
