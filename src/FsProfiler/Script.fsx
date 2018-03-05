@@ -84,11 +84,13 @@ DP ()
 DP ()
 WP ()
 
-let printTasks tasks = 
-    let rec printTask level task =
-        printfn "%*s%s" (level * 4) "" task.Name
-        task.SubTasks |> List.iter (printTask (level + 1))
-        printfn "%*s---Done in %ims" (level * 4) "" task.DurationInMilliseconds
-    tasks |> List.iter (printTask 0)
+module ConsolePrinter =
+
+    let printTasks tasks = 
+        let rec printTask level task =
+            printfn "%*s%s" (level * 4) "" task.Name
+            task.SubTasks |> List.iter (printTask (level + 1))
+            printfn "%*s--- %ims" (level * 4) "" task.DurationInMilliseconds
+        tasks |> List.iter (printTask 0)
     
-tp.GetTasks () |> printTasks
+tp.GetTasks () |> ConsolePrinter.printTasks
