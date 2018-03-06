@@ -1,8 +1,10 @@
-open System
 #load "FsProfiler.fs"
-open FsProfiler
+#load "Stores.fs"
+#load "Formatters.fs"
 
-open System.Diagnostics.Tracing
+open FsProfiler
+open Stores
+open Formatters
 
 let wait (ms : int) = 
     System.Threading.Thread.Sleep ms
@@ -24,73 +26,11 @@ let WP () =
     WrappingProfiler.Profile "Test" impl
 
 
-type TraceEvent =
-| TaskStart of Guid * Guid option * string
-| TaskStop of Guid * Guid option * int64
+let store = new MemoryStore ()
 
-type Task =
-    {
-        Id : Guid
-        Name : string
-        SubTasks : Task list
-        DurationInMilliseconds : int64
-    }
-
-
-type TracePrinter () as this =
-    inherit EventListener ()
-
-    do
-        this.EnableEvents(FsProfilerEvents.Log, EventLevel.LogAlways)        
-
-    let queue = new System.Collections.Concurrent.ConcurrentQueue<TraceEvent> ()
-
-    member __.GetTasks () = 
-        let tasks = queue |> Seq.toList
-        let rec mapTask parent c =
-            match c with
-            | TaskStart (id, p, name) when p = parent -> 
-                let timing = tasks |> List.pick (fun c -> 
-                    match c with 
-                    | TaskStop (cid, p, time) when id = cid && p = parent -> time |> Some
-                    | _ -> None)
-                { 
-                    Id = id
-                    Name = name
-                    SubTasks = tasks |> List.choose (mapTask (id |> Some))
-                    DurationInMilliseconds = timing 
-                } |> Some
-            | _ -> None
-
-        tasks
-        |> List.map (mapTask None)
-        |> List.choose id
-
-    override __.OnEventWritten args =
-        if args.EventSource.Name = "FsProfilerEvents" then
-            match args.EventId with
-            | 1 -> TaskStart(args.Payload.[1] :?> Guid, None, args.Payload.[0] :?> string)
-            | 2 -> TaskStart(args.Payload.[2] :?> Guid, args.Payload.[3] :?> Guid |> Some, args.Payload.[0] :?> string)
-            | 3 -> TaskStop(args.Payload.[2] :?> Guid, None, args.Payload.[1] :?> int64)
-            | 4 -> TaskStop(args.Payload.[3] :?> Guid, args.Payload.[4] :?> Guid |> Some, args.Payload.[2] :?> int64)
-            | _ -> failwith "Unkown event"
-
-            |> queue.Enqueue
-
-
-let tp = new TracePrinter ()
 
 DP ()
 DP ()
 WP ()
-
-module ConsolePrinter =
-
-    let printTasks tasks = 
-        let rec printTask level task =
-            printfn "%*s%s" (level * 4) "" task.Name
-            task.SubTasks |> List.iter (printTask (level + 1))
-            printfn "%*s--- %ims" (level * 4) "" task.DurationInMilliseconds
-        tasks |> List.iter (printTask 0)
     
-tp.GetTasks () |> ConsolePrinter.printTasks
+store.GetTasks () |> ConsolePrinter.printTasks
