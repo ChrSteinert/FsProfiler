@@ -5,6 +5,12 @@ VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FsProfiler", "src\FsProfiler\FsProfiler.fsproj", "{DC8C143E-EE8E-4640-82FD-811FEB979639}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8BFD8695-3C7C-410F-84F0-67B271ACC1B5}"
+	ProjectSection(SolutionItems) = preProject
+		build.fsx = build.fsx
+		CHANGELOG = CHANGELOG
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

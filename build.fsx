@@ -5,7 +5,7 @@
 #r "./packages/build/FAKE/tools/FakeLib.dll"
 
 open Fake
-open System
+open Fake.AssemblyInfoFile
 
 // --------------------------------------------------------------------------------------
 // Build variables
@@ -13,31 +13,8 @@ open System
 
 let buildDir  = "./build/"
 let appReferences = !! "/**/*.fsproj"
-let dotnetcliVersion = "2.0.2"
-let mutable dotnetExePath = "dotnet"
 
-// --------------------------------------------------------------------------------------
-// Helpers
-// --------------------------------------------------------------------------------------
-
-let run' timeout cmd args dir =
-    if execProcess (fun info ->
-        info.FileName <- cmd
-        if not (String.IsNullOrWhiteSpace dir) then
-            info.WorkingDirectory <- dir
-        info.Arguments <- args
-    ) timeout |> not then
-        failwithf "Error while running '%s' with args: %s" cmd args
-
-let run = run' System.TimeSpan.MaxValue
-
-let runDotnet workingDir args =
-    let result =
-        ExecProcess (fun info ->
-            info.FileName <- dotnetExePath
-            info.WorkingDirectory <- workingDir
-            info.Arguments <- args) TimeSpan.MaxValue
-    if result <> 0 then failwithf "dotnet %s failed" args
+System.Environment.CurrentDirectory <- __SOURCE_DIRECTORY__
 
 // --------------------------------------------------------------------------------------
 // Targets
@@ -47,33 +24,75 @@ Target "Clean" (fun _ ->
     CleanDirs [buildDir]
 )
 
-Target "InstallDotNetCLI" (fun _ ->
-    dotnetExePath <- DotNetCli.InstallDotNetSDK dotnetcliVersion
-)
+Target "AssemblyInfo" (fun _ ->
+    let release = ReleaseNotesHelper.LoadReleaseNotes "CHANGELOG"
 
-Target "Restore" (fun _ ->
-    appReferences
-    |> Seq.iter (fun p ->
-        let dir = System.IO.Path.GetDirectoryName p
-        runDotnet dir "restore"
-    )
+    let getAssemblyInfoAttributes projectName =
+        [ Attribute.Title (projectName)
+          Attribute.Product "Fracer"
+          Attribute.Description "" ]
+
+    let getProjectDetails projectPath =
+        let projectName = System.IO.Path.GetFileNameWithoutExtension(projectPath)
+        ( projectPath,
+          projectName,
+          System.IO.Path.GetDirectoryName(projectPath),
+          (getAssemblyInfoAttributes projectName))
+
+    !! "**/*.??proj"
+    |> Seq.map getProjectDetails
+    |> Seq.iter (fun (projFileName, projectName, folderName, attributes) ->
+        match projFileName with
+        | Fsproj -> 
+            let asmInfoFile = folderName </> "AssemblyInfo.fs"
+            let version = 
+                let notesVersion = release.AssemblyVersion |> SemVerHelper.parse
+                match GetAttribute "AssemblyVersion" asmInfoFile with
+                | Some old -> 
+                    let old = old.Value |> SemVerHelper.parse
+                    if old.Major = notesVersion.Major && old.Minor = notesVersion.Minor then
+                        { old with Patch = old.Patch + 1 }
+                    else
+                        notesVersion
+                | None -> notesVersion
+                |> (fun c -> Attribute.Version (c.ToString ()))
+
+            let fileVersion = 
+                let notesVersion = release.AssemblyVersion |> SemVerHelper.parse
+                match GetAttribute "AssemblyFileVersion" asmInfoFile with
+                | Some old -> 
+                    let old = old.Value |> SemVerHelper.parse
+                    if old.Major = notesVersion.Major && old.Minor = notesVersion.Minor then
+                        { old with Patch = old.Patch + 1 }
+                    else
+                        notesVersion
+                | None -> notesVersion
+                |> (fun c -> Attribute.FileVersion (c.ToString ()))
+
+            CreateFSharpAssemblyInfo asmInfoFile (version :: fileVersion :: attributes)
+        | _ -> ()
+        )
 )
 
 Target "Build" (fun _ ->
     appReferences
     |> Seq.iter (fun p ->
-        let dir = System.IO.Path.GetDirectoryName p
-        runDotnet dir "build"
+        DotNetCli.Build (fun c -> { c with Project = p })
     )
 )
+
+Target "Pack" (fun _ -> Paket.Pack id)
+
+Target "Push" (fun _ -> Paket.Push (fun c -> { c with PublishUrl = "http://proget.de.kworld.kpmg.com/nuget/KPMG.DE.KAIL.NUGET/"; ApiKey = "[APIKEY]" }))
 
 // --------------------------------------------------------------------------------------
 // Build order
 // --------------------------------------------------------------------------------------
 
 "Clean"
-  ==> "InstallDotNetCLI"
-  ==> "Restore"
-  ==> "Build"
+    ==> "AssemblyInfo"
+    ==> "Build"
+    ==> "Pack"
+    ==> "Push"
 
 RunTargetOrDefault "Build"

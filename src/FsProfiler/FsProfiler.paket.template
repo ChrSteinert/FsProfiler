@@ -1,0 +1,4 @@
+type project
+Authors Christian Steinert
+files
+    bin/Release/netstandard2.0/* ==> lib/netstandard2.0
