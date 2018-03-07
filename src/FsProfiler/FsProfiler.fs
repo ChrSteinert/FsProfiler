@@ -1,4 +1,4 @@
-module FsProfiler
+namespace FsProfiler
 
 open System
 open System.Diagnostics
