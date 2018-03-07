@@ -3,11 +3,10 @@
 #load "Formatters.fs"
 #I @"C:\Users\christiansteinert\Downloads"
 #r "Microsoft.Diagnostics.Tracing.TraceEvent.dll"
+#r "System.Xml.Linq"
 
 
 open FsProfiler
-open Stores
-open Formatters
 
 let wait (ms : int) = 
     System.Threading.Thread.Sleep ms
@@ -29,15 +28,30 @@ let WP () =
     WrappingProfiler.Profile "Test" impl
 
 open System.Net
+open System.Xml.Linq
 
-let download (url : string) =
-    use __ = new DisposingProfiler "Download site"
+let linkCountOnPage (url : string) =
+    use dp = new DisposingProfiler "Analyzing site"
     use client = new WebClient()
-    client.DownloadString url
+    let html = 
+        use __ = dp.StartSubtask "Downloading"
+        client.DownloadString url
+    let result =
+        use __ = dp.StartSubtask "Parsing HTML"
+        let doc = XDocument.Parse html
+        let rec getATag (elements : XElement seq) =
+            elements
+            |> Seq.filter (fun c -> c.Name.LocalName = "a")
+            |> Seq.append (
+                elements 
+                |> Seq.filter (fun c -> c.Name.LocalName <> "a") 
+                |> Seq.collect (fun c -> c.Descendants () |> getATag))
+        doc.Root.Descendants () |> getATag |> Seq.length
+    result 
 
 open FsProfiler.Stores
 let store = new MemoryStore ()
-
+linkCountOnPage "https://bing.com"
 
 DP ()
 DP ()
