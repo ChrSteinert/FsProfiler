@@ -4,7 +4,7 @@ open System
 open System.Diagnostics
 open System.Diagnostics.Tracing
 
-[<EventSource>]
+[<EventSource(Guid = "25cb5edc-07fc-57ae-8325-0f742b7c59f8")>]
 type FsProfilerEvents private () =
     inherit EventSource ()
 

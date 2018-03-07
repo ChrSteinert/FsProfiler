@@ -1,6 +1,9 @@
 #load "FsProfiler.fs"
 #load "Stores.fs"
 #load "Formatters.fs"
+#I @"C:\Users\christiansteinert\Downloads"
+#r "Microsoft.Diagnostics.Tracing.TraceEvent.dll"
+
 
 open FsProfiler
 open Stores
@@ -34,3 +37,19 @@ DP ()
 WP ()
     
 store.GetTasks () |> ConsolePrinter.printTasks
+
+
+open Microsoft.Diagnostics.Tracing.Session
+
+TraceEventSession.GetActiveSessionNames ()
+let ses = new TraceEventSession("asd1", TraceEventSessionOptions.Create)
+ses.EnableProvider(System.Guid.Parse "25cb5edc-07fc-57ae-8325-0f742b7c59f8")
+ses.EnableProvider("FsProfilerEvents")
+ses.Source.Dynamic.add_All (fun c -> printfn "%A" c)
+let tsk = System.Threading.Tasks.Task.Run (fun () -> ses.Source.Process () )
+tsk.Dispose ()
+ses.Source.StopProcessing ()
+ses.Stop ()
+ses.Dispose ()
+
+ses.Source.Dynamic
