@@ -1,12 +1,14 @@
 #load "FsProfiler.fs"
-#load "Stores.fs"
-#load "Formatters.fs"
+#load "Listeners.fs"
+#load "Output.fs"
 #I @"C:\Users\christiansteinert\Downloads"
 #r "Microsoft.Diagnostics.Tracing.TraceEvent.dll"
 #r "System.Xml.Linq"
 
 
 open FsProfiler
+open FsProfiler.Listeners
+open FsProfiler.Output
 
 let wait (ms : int) = 
     System.Threading.Thread.Sleep ms
@@ -15,7 +17,7 @@ let DP () =
     let qwe (fp : DisposingProfiler) = 
         use fp2 = fp.StartSubtask "DP Level 1"
         wait 5
-        use fp3 = fp2.StartSubtask "DP Level 2"
+        use __ = fp2.StartSubtask "DP Level 2"
         wait 4
     use fp = new DisposingProfiler "DP Level 0"
     qwe fp    
@@ -26,6 +28,39 @@ let WP () =
         wait 8
     
     WrappingProfiler.Profile "Test" impl
+
+
+let tObs = new TaskObservable ()
+let asd = tObs.Subscribe (TaskPrinter.print)
+
+DP ()
+DP ()
+WP ()
+
+asd.Dispose ()
+    
+
+
+open Microsoft.Diagnostics.Tracing.Session
+
+TraceEventSession.GetActiveSessionNames ()
+let ses = new TraceEventSession("asd1", TraceEventSessionOptions.Create)
+ses.EnableProvider(System.Guid.Parse "25cb5edc-07fc-57ae-8325-0f742b7c59f8")
+ses.EnableProvider("FsProfilerEvents")
+ses.Source.Dynamic.add_All (fun c -> printfn "%A" c)
+let tsk = System.Threading.Tasks.Task.Run (fun () -> ses.Source.Process () )
+tsk.Dispose ()
+ses.Source.StopProcessing ()
+ses.Stop ()
+ses.Dispose ()
+
+ses.Source.Dynamic
+
+
+
+
+
+
 
 open System.Net
 open System.Xml.Linq
@@ -49,30 +84,7 @@ let linkCountOnPage (url : string) =
         doc.Root.Descendants () |> getATag |> Seq.length
     result 
 
-open FsProfiler.Stores
+open FsProfiler.Listeners
 let store = new MemoryStore ()
 linkCountOnPage "https://bing.com"
-
-DP ()
-DP ()
-WP ()
-
-open FsProfiler.Formatters
-    
-store.GetTasks () |> ConsolePrinter.printTasks
-
-
-open Microsoft.Diagnostics.Tracing.Session
-
-TraceEventSession.GetActiveSessionNames ()
-let ses = new TraceEventSession("asd1", TraceEventSessionOptions.Create)
-ses.EnableProvider(System.Guid.Parse "25cb5edc-07fc-57ae-8325-0f742b7c59f8")
-ses.EnableProvider("FsProfilerEvents")
-ses.Source.Dynamic.add_All (fun c -> printfn "%A" c)
-let tsk = System.Threading.Tasks.Task.Run (fun () -> ses.Source.Process () )
-tsk.Dispose ()
-ses.Source.StopProcessing ()
-ses.Stop ()
-ses.Dispose ()
-
-ses.Source.Dynamic
+store.GetTasks () |> Seq.iter ConsolePrinter.printTask

@@ -2,9 +2,12 @@
 
 … let's you track the execution times of definable pieces of code.
 
-## Example
+## Examples
 
-Set up something to profile
+### Disposing Profiler
+
+The `DisposingProfiler` tracks the time taken between its instanciation and disposition.
+It is super easy to integrate and requires no manual "stopping".
 
 ```F#
 open System.Net
@@ -30,11 +33,22 @@ let linkCountOnPage (url : string) =
     result 
 ```
 
-Prepare a sink for the profiler messages
+Set up a listener for events. 
 
 ``` F#
-open FsProfiler.Stores
-let store = new MemoryStore ()
+open FsProfiler.Listeners
+
+use tObs = new TaskObservable ()
+```
+
+This listener implements `IObservable<Task>`. 
+You can easily observe completed tasks by subscribing to that listener. 
+The easyest way is to just use one of the task formatters.
+
+```F#
+open FsProfiler.Output
+
+let asd = tObs.Subscribe (TaskPrinter.print)
 ```
 
 Execute the code
@@ -43,15 +57,8 @@ Execute the code
 linkCountOnPage "https://bing.com"
 ```
 
-Use a formatter to see the results.
+As we subscribed to completed events with an printer that just outputs to the console we get the following output:
 
-```F#
-open FsProfiler.Formatters
-    
-store.GetTasks () |> ConsolePrinter.printTasks
-```
-
-This will print something like 
 
 ```
 Analyzing site

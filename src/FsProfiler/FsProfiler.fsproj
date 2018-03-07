@@ -7,8 +7,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="FsProfiler.fs" />
-    <Compile Include="Stores.fs" />
-    <Compile Include="Formatters.fs" />
+    <Compile Include="Listeners.fs" />
+    <Compile Include="Output.fs" />
     <Compile Include="AssemblyInfo.fs" />
     <None Include="paket.references" />
     <None Include="Script.fsx" />
