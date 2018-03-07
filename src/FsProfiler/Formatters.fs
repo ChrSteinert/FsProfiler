@@ -1,4 +1,4 @@
-﻿module Formatters
+﻿module FsProfiler.Formatters
 
 open Stores
 

@@ -1,4 +1,4 @@
-﻿module Stores
+﻿module FsProfiler.Stores
 
 open System
 open System.Diagnostics.Tracing
