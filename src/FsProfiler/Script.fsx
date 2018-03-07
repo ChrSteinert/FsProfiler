@@ -32,12 +32,18 @@ let WP () =
 
 let tObs = new ObservableTaskListener ()
 let asd = tObs.Subscribe (TaskPrinter.print)
+let file = System.IO.File.OpenWrite(@"B:\FsProfiler.log")
+let writer = new System.IO.StreamWriter(file)
+let outputToFile = tObs.Subscribe (TaskPrinter.fprint writer)
 
 DP ()
 DP ()
 WP ()
 
 asd.Dispose ()
+outputToFile.Dispose ()
+writer.Dispose ()
+file.Dispose ()
     
 
 
