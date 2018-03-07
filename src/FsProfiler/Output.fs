@@ -9,7 +9,7 @@ module TaskPrinter =
     let sprint task = 
         let builder = StringBuilder ()
         let rec printTask level task =
-            printfn "%*s%s" (level * 4) "" task.Name
+            Printf.bprintf builder "%*s%s\n" (level * 4) "" task.Name
             task.SubTasks |> List.iter (printTask (level + 1))
             Printf.bprintf builder "%*s--- %ims\n" (level * 4) "" task.DurationInMilliseconds
         task |> printTask 0

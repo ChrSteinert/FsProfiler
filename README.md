@@ -38,7 +38,7 @@ Set up a listener for events.
 ``` F#
 open FsProfiler.Listeners
 
-use tObs = new TaskObservable ()
+use tObs = new ObservableTaskListener ()
 ```
 
 This listener implements `IObservable<Task>`. 

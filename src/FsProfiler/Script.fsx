@@ -30,7 +30,7 @@ let WP () =
     WrappingProfiler.Profile "Test" impl
 
 
-let tObs = new TaskObservable ()
+let tObs = new ObservableTaskListener ()
 let asd = tObs.Subscribe (TaskPrinter.print)
 
 DP ()
@@ -84,7 +84,6 @@ let linkCountOnPage (url : string) =
         doc.Root.Descendants () |> getATag |> Seq.length
     result 
 
-open FsProfiler.Listeners
 let store = new MemoryStore ()
 linkCountOnPage "https://bing.com"
-store.GetTasks () |> Seq.iter ConsolePrinter.printTask
+store.GetTasks () |> Seq.iter TaskPrinter.print
