@@ -4,6 +4,10 @@
     <OutputType>Library</OutputType>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageId>FsProfiler</PackageId>
+    <Version>0.3.0</Version>
+    <Authors>Christian Steinert</Authors>
+    <Product>FsProfiler</Product>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="FsProfiler.fs" />
