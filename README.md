@@ -1,5 +1,7 @@
 # FsProfiler
 
+[![NuGet Status](https://img.shields.io/nuget/v/FsProfiler.svg?style=flat)](https://www.nuget.org/packages/FsProfiler/)
+
  let's you track the execution times of definable pieces of code.
 
 ## Examples
