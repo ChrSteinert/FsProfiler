@@ -13,7 +13,5 @@
     <Compile Include="FsProfiler.fs" />
     <Compile Include="Listeners.fs" />
     <Compile Include="Output.fs" />
-    <None Include="paket.references" />
   </ItemGroup>
-  <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>
