@@ -5,15 +5,15 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>FsProfiler</PackageId>
-    <Version>0.3.0</Version>
+    <Version>0.3.1</Version>
     <Authors>Christian Steinert</Authors>
     <Product>FsProfiler</Product>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Description>A library to measure and report code runtimes and profile code.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageProjectUrl>https://github.com/ChrSteinert/FsProfier</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/ChrSteinert/FsProfiler</PackageProjectUrl>
     <PackageTags>F#;profiling</PackageTags>
-    <RepositoryUrl>https://github.com/ChrSteinert/FsProfier</RepositoryUrl>
+    <RepositoryUrl>https://github.com/ChrSteinert/FsProfiler</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
   <ItemGroup>
