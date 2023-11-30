@@ -43,6 +43,7 @@ type FsProfilerEvents private () =
   interface IDisposable with
     member __.Dispose () = log.Dispose ()
 
+/// A profiler that starts upon creation and stops, when it is disposed.
 type DisposingProfiler private (eventName, parent : DisposingProfiler option) =
   let watch = Stopwatch.StartNew ()
   let taskId = Guid.NewGuid ()
@@ -57,6 +58,8 @@ type DisposingProfiler private (eventName, parent : DisposingProfiler option) =
   member __.EventName = eventName
   member __.TaskId = taskId
 
+  /// Returns a new `DisposingProfiler`, that starts imediately and stops when it is disposed.
+  /// Disposing the returned profiler does not stop the current profiler.
   member this.StartSubtask eventName =
     new DisposingProfiler(eventName, this |> Some)
 
@@ -70,6 +73,8 @@ type DisposingProfiler private (eventName, parent : DisposingProfiler option) =
     member this.Dispose () =
       this.Dispose ()
 
+/// A profiler that takes a function `f : unit -> 'a`, runs that function, publishes the task start and stop events
+/// and returns the result of `f`.
 type WrappingProfiler<'a> private (eventName, f : unit -> 'a) =
 
   let taskId = Guid.NewGuid ()

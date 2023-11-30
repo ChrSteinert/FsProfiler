@@ -16,6 +16,8 @@ type Task =
     DurationInMilliseconds : int64
   }
 
+/// Listens for profiler events. It understands the relationship between subtasks.
+/// It can be observed, and will provide ETW events it catches as values of `FsProfiler.Listeners.Task`.
 type ObservableTaskListener () as this =
   inherit EventListener ()
 
